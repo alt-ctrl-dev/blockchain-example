@@ -1,0 +1,47 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/bin/yarn install
+
+PATH: 
+  /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:/Applications/Wireshark.app/Contents/MacOS:/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home/bin:/Users/rkc/Library/Android/sdk/tools:/Users/rkc/Library/Android/sdk/platform-tools
+
+Yarn version: 
+  1.5.1
+
+Node version: 
+  6.10.3
+
+Platform: 
+  darwin x64
+
+npm manifest: 
+  {
+    "name": "BCC-Dapp",
+    "version": "1.0.0",
+    "description": "",
+    "main": "truffle.js",
+    "directories": {
+      "test": "test"
+    },
+    "scripts": {
+      "dev": "lite-server",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+      "lite-server": "^2.3.0"
+    },
+    "dependencies": {
+      "zeppelin-solidity": "^1.5.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: ENOENT: no such file or directory, open '/Users/rkc/Library/Caches/Yarn/v1/npm-uws-9.14.0-fac8386befc33a7a3705cbd58dc47b430ca4dd95/.yarn-metadata.json'
+      at Error (native)

@@ -1,0 +1,23 @@
+{
+  "name": "bcc-dapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build:contract": "truffle migrate --compile-all --reset --network ganache",
+    "dev":"lite-server",
+    "start": "npm run build:contract && npm run dev",
+    "test": "truffle test --network ganache"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "lite-server": "^2.3.0"
+  },
+  "dependencies": {
+    "zeppelin-solidity": "^1.5.0"
+  }
+}

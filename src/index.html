@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Blockchain Center Space Booking</title>
+
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="jumbotron text-center">
+      <h2>
+        <span>
+          <img src="imgs/bcc_logo.png" alt="">
+        </span>Booking Dapp</h2>
+    </div>
+
+    <div class="col-md-12" id="room-list">
+      <div class="row">
+        <div class="row">
+          <div class="col-lg-12">
+            <p id="account" class="welcome pull-right"></p>
+            <p id="accountBalance" class="welcome pull-left"></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
+            <p id="numberOfRooms" class="welcome pull-left"></p>
+          </div>
+        </div>
+
+        <div class="row panel panel-default">
+          <div class="panel-heading clearfix">
+            <div class="panel-title">
+              <button class="btn btn-info btn-lg pull-left" data-toggle="collapse" data-target="#events" aria-expanded="false" aria-controls="events">Operations</button>
+              <button id="offer-room" class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#offerRoom" style="display: inline-block;">Offer Room</button>
+              <button id="buy_token" class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#buyToken" style="display: none;">Buy Token</button>
+            </div>
+          </div>
+          <ul id="events" class="collapse list-group"></ul>
+        </div>
+
+        <div id="roomsRow" class="row">
+          <!-- Rooms LOAD HERE -->
+        </div>
+      </div>
+    </div>
+
+    <div id="roomTemplate" style="display: block;">
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="panel panel-default panel-pet">
+          <div class="panel-heading">
+            <h3 class="panel-title"></h3>
+          </div>
+          <div class="panel-body">
+            <strong>Price</strong>:
+            <span class="room-price"></span> BCCT
+            <br/>
+            <strong>Size</strong>:
+            <span class="room-size"></span>
+            <br/>
+            <strong>Description</strong>:
+            <span class="room-description"></span>
+            <br/></br>
+            <strong>Booked by</strong>:
+            <span class="room-booked-by"></span>
+            <br/>
+            <br/>
+            <button class="btn btn-default btn-booking" type="button" data-id="0" onclick="App.bookRoom(); return false;">Booking</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal form to sell an article -->
+    <div class="modal fade" id="offerRoom" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Offer your room</h4>
+          </div>
+          <div class="modal-body">
+
+            <div class="row">
+              <div class="col-lg-12">
+                <form id="offerForm">
+                  <div class="form-group">
+                    <label for="room_name">Room name</label>
+                    <input type="text" name="room_name" required class="form-control" id="room_name" placeholder="Enter the name of your room">
+                  </div>
+                  <div class="form-group">
+                    <label for="price">Price in BCC Token</label>
+                    <input type="number" name="price" required class="form-control" id="price" placeholder="1" pattern="[0-9]+([\.,][0-9]+)?"
+                      step="0.01">
+                  </div>
+                  <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea type="text" name="description" required class="form-control vresize" id="description" placeholder="Describe your room"
+                      maxlength="255"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="size">Size</label>
+                    <select required id="size" name="size">
+                      <option value="small">Small ( &lt; 5 ppl)</option>
+                      <option value="medium">Medium ( 5 - 15 ppl)</option>
+                      <option value="large">Large ( &gt; 15 ppl)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <input type="submit" class="btn btn-primary btn-success" value="Submit" />
+                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/web3.js"></script>
+    <script src="js/truffle-contract.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
