@@ -127,6 +127,8 @@ contract BCCRoomBooking is Owned {
     function purchaseTokens() payable public {
         // the bookingPerson can book the room
         // testtoken.buyTokens(acct0,{from:acct1,value:web3.toWei(1, "ether")})
+
         BCCToken(bccTokenAddress).buyTokens(msg.sender,owner,msg.value);
+        // BCCToken(bccTokenAddress).balanceOf(msg.sender);
     }
 }

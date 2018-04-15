@@ -14,7 +14,8 @@ contract BCCToken is StandardToken{
     function BCCToken() public{
         totalSupply_ = INITIAL_SUPPLY;
         balances[msg.sender] = INITIAL_SUPPLY;
-        rate = 20000000000000000;
+        rate = 1;
+        divider = 10000000000000000;
     }
 
     /**
@@ -22,16 +23,14 @@ contract BCCToken is StandardToken{
     * @param _beneficiary Address performing the token purchase
     */
     function buyTokens(address _beneficiary,address _owner,uint256 _amount) public  {
-
+ 
         uint256 weiAmount = _amount;
         require(_beneficiary != address(0));
         require(weiAmount != 0);
 
-        // // calculate token amount to be created
+        // calculate token amount to be created
         uint256 tokens = weiAmount.mul(rate).div(divider);
-
-        transferMoney(_owner, tokens, _beneficiary);
-        _owner.transfer(weiAmount);
+        transferMoney(_beneficiary, tokens, _owner);
     }
 
     function transferMoney(address _to, uint256 _value, address _from) public returns(bool){

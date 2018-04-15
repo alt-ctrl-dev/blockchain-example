@@ -49,7 +49,7 @@
             <div class="panel-title">
               <button class="btn btn-info btn-lg pull-left" data-toggle="collapse" data-target="#events" aria-expanded="false" aria-controls="events">Operations</button>
               <button id="offer-room" class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#offerRoom" style="display: inline-block;">Offer Room</button>
-              <button id="buy_token" class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#buyToken" style="display: none;">Buy Token</button>
+              <button id="buy_token" disabled class="btn btn-info btn-lg pull-right" data-toggle="modal" data-target="#buyToken" style="display: none;">Buy Token</button>
             </div>
           </div>
           <ul id="events" class="collapse list-group"></ul>
@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <div id="roomTemplate" style="display: block;">
+    <div id="roomTemplate" style="display: none;">
       <div class="col-sm-6 col-md-4 col-lg-3">
         <div class="panel panel-default panel-pet">
           <div class="panel-heading">
@@ -81,7 +81,7 @@
             <span class="room-booked-by"></span>
             <br/>
             <br/>
-            <button class="btn btn-default btn-booking" type="button" data-id="0" onclick="App.bookRoom(); return false;">Booking</button>
+            <button class="btn btn-default btn-booking" type="button" data-id="0" onclick="App.bookRoom(this); return false;">Booking</button>
           </div>
         </div>
       </div>
