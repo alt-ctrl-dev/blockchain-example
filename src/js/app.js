@@ -4,6 +4,7 @@ App = {
   c_owner: "0x0",
   account: "0x0",
   loading: false,
+  roomInstance: null,
 
   init: function () {
     App.initWeb3();
@@ -24,25 +25,30 @@ App = {
   },
 
   initContract: function () {
-    var firstPromise = $.get("BCCToken.json");
-    var secondPromise = $.get("BCCRoomBooking.json");
+    $.get("BCCRoomBooking.json")
+      .done(function (data) {
+        // console.log(data);
+        // Get the necessary contract artifact file and instantiate it with truffle-contract.
+        // App.contracts.BCCRoomBooking = TruffleContract(data);
+        var BCCRoomBooking = TruffleContract(data);
 
-    $.when(firstPromise, secondPromise).done(function (bccTokenArtifact, bccRoomBookingArtifact) {
-      // Get the necessary contract artifact file and instantiate it with truffle-contract.
-      App.contracts.BCCToken = TruffleContract(bccTokenArtifact[0]);
+        // Set the provider for our contract.
+        // App.contracts.BCCRoomBooking.setProvider(App.web3Provider);
+        BCCRoomBooking.setProvider(App.web3Provider);
 
-      // Set the provider for our contract.
-      App.contracts.BCCToken.setProvider(App.web3Provider);
-
-      // Get the necessary contract artifact file and instantiate it with truffle-contract.
-      App.contracts.BCCRoomBooking = TruffleContract(bccRoomBookingArtifact[0]);
-
-      // Set the provider for our contract.
-      App.contracts.BCCRoomBooking.setProvider(App.web3Provider);
-
-      App.getOwner();
-    });
-    return App.bindJQEvents();
+        App.bindJQEvents();
+        BCCRoomBooking.deployed()
+          .then((instance) => {
+            App.roomInstance = instance;
+            App.getOwner();
+          }).catch(err => {
+            console.error("Could not get instance");
+            console.error(err);
+          });
+      })
+      .fail(function () {
+        alert("error getting ABI");
+      })
   },
 
   bindJQEvents: function () {
@@ -51,41 +57,66 @@ App = {
   },
 
   getOwner: function () {
-    App.contracts.BCCRoomBooking.deployed().then((instance) => {
-      return instance.owner();
-    }).then((owner) => {
+    App.roomInstance.owner().then((owner) => {
       App.c_owner = owner;
       App.getCurrentAccount();
       App.listenEvents();
-    }).catch(err=>{
+    }).catch(err => {
       console.error("Could not get owner");
       console.error(err);
     });
+
+    // App.contracts.BCCRoomBooking.deployed().then((instance) => {
+    //   return instance.owner();
+    // }).then((owner) => {
+    //   App.c_owner = owner;
+    //   App.getCurrentAccount();
+    //   App.listenEvents();
+    // }).catch(err => {
+    //   console.error("Could not get owner");
+    //   console.error(err);
+    // });
   },
 
-  listenEvents: function() {
-    App.contracts.BCCRoomBooking.deployed().then((roomBooking) => {
+  listenEvents: function () {
+    var offerRoomEvent = App.roomInstance.OfferRoomEvent({
+      fromBlock: 0,
+      toBlock: 'latest'
+    });
+    offerRoomEvent.watch(function (error, result) {
+      console.log(result.args);
+      App.updateUI();
+    });
 
-      var offerRoomEvent = roomBooking.OfferRoomEvent({
-        fromBlock: 0,
-        toBlock: 'latest'
-      });
-      offerRoomEvent.watch(function (error, result) {
-        debugger
-        console.log(result.args);
-        App.updateUI();
-      });
-  
-      var bookRoomEvent = roomBooking.BookRoomEvent({
-        fromBlock: 0,
-        toBlock: 'latest'
-      });
-      bookRoomEvent.watch(function (error, result) {
-        debugger
-        console.log(result.args);
-        App.updateUI();
-      });
-    })
+    var bookRoomEvent = App.roomInstance.BookRoomEvent({
+      fromBlock: 0,
+      toBlock: 'latest'
+    });
+    bookRoomEvent.watch(function (error, result) {
+      console.log(result.args);
+      App.updateUI();
+    });
+
+    // App.contracts.BCCRoomBooking.deployed().then((roomBooking) => {
+
+    //   var offerRoomEvent = roomBooking.OfferRoomEvent({
+    //     fromBlock: 0,
+    //     toBlock: 'latest'
+    //   });
+    //   offerRoomEvent.watch(function (error, result) {
+    //     console.log(result.args);
+    //     App.updateUI();
+    //   });
+
+    //   var bookRoomEvent = roomBooking.BookRoomEvent({
+    //     fromBlock: 0,
+    //     toBlock: 'latest'
+    //   });
+    //   bookRoomEvent.watch(function (error, result) {
+    //     console.log(result.args);
+    //     App.updateUI();
+    //   });
+    // })
   },
 
   getCurrentAccount: function () {
@@ -107,14 +138,13 @@ App = {
 
 
   updateUI: function () {
+    $('#reload').modal('hide');
     $('#account').text("Account: " + App.account).css({
       "color": ((App.account == App.c_owner) ? "red" : "black")
     });
     App.getTokenBalance(App.account);
-    // // Use our contract to retieve the balance.
-      debugger
-    App.getNumberOfRooms();
-    App.reloadRooms();
+    // App.getNumberOfRooms();
+    // App.reloadRooms();
     if (App.account == App.c_owner) {
       $('#offer-room').show();
       $('#buy_token').hide();
@@ -136,15 +166,23 @@ App = {
     });
   },
 
-  getTokenBalance: function () {
-    App.contracts.BCCToken.deployed().then(function (instance) {
-      return instance.balanceOf(App.account);
-    }).then(function (result) {
+  getTokenBalance: function (account) {
+    debugger;
+    App.roomInstance.getBalance(account).then(function (result) {
+      debugger;
       $('#accountBalance').text(result.c[0] + " BCC token(s) available");
     }).catch(function (err) {
       console.log(err.message);
       $('#accountBalance').text("Could not get tokens");
     });
+    // App.contracts.BCCToken.deployed().then(function (instance) {
+    //   return instance.balanceOf(App.account);
+    // }).then(function (result) {
+    //   $('#accountBalance').text(result.c[0] + " BCC token(s) available");
+    // }).catch(function (err) {
+    //   console.log(err.message);
+    //   $('#accountBalance').text("Could not get tokens");
+    // });
   },
 
   offerRoom: function (event) {
@@ -256,41 +294,16 @@ App = {
         console.error(err);
         alert('error occured');
       });
-  }
+  },
 
-  // handleTransfer: function (event) {
-  //   event.preventDefault();
-
-  //   var amount = parseFloat($('#BCCTokenTransferAmount').val());
-  //   var toAddress = $('#BCCTokenTransferAddress').val();
-  //   // alert('Transfer ' + amount + ' BCC Token to ' + toAddress);
-
-  //   web3.eth.getAccounts(function (error, accounts) {
-  //     if (error) {
-  //       console.error(error);
-  //       return;
-  //     }
-
-  //     var account = accounts[0];
-
-  //     App.contracts.BCCRoomBooking.deployed().then(instance => {
-  //       var bccToken = instance;
-  //       return bccToken.transfer(toAddress, amount, {
-  //         from: account
-  //       });
-  //     }).then(result => {
-  //       alert(`Transfer ${amount} BCC Token to ${toAddress}`);
-  //       return App.getBalances();
-  //     }).catch(err => {
-  //       console.error(err.message);
-  //     })
-  //   })
-  // },
+  buyTokens: function (event) {}
 };
 
 
 $(function () {
   $(window).load(function () {
     App.init();
+
+    $('#reload').modal('show');
   });
 });

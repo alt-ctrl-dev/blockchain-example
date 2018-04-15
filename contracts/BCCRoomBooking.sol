@@ -131,4 +131,9 @@ contract BCCRoomBooking is Owned {
         BCCToken(bccTokenAddress).buyTokens(msg.sender,owner,msg.value);
         // BCCToken(bccTokenAddress).balanceOf(msg.sender);
     }
+
+    function getBalance(address addr) public returns (uint256) {
+        require(addr != address(0));
+        return BCCToken(bccTokenAddress).balanceOf(addr);
+    }
 }
