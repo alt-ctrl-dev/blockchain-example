@@ -25,6 +25,8 @@ contract('BCCRoomBooking', function (accounts) {
         }).then(function (instance) {
             return instance.getRoomsForBooking();
         }).then(function (data) {
+            console.log("should have one room being able to offer")
+            console.log(data.length)
             assert.equal(data.length, 1, "Should have one room been offered");
         })
     });
@@ -60,8 +62,8 @@ contract('BCCRoomBooking', function (accounts) {
             from: acct1
         });
 
-        console.log("booking");
-        console.log(booking.logs[0].args);
+        // console.log("booking");
+        // console.log(booking.logs[0].args);
         
         assert.equal(booking.logs[0].event, "BookRoomEvent", "BookRoomEvent did not trigger");
 
@@ -84,14 +86,14 @@ contract('BCCRoomBooking', function (accounts) {
         var tokenInstance = await BCCToken.deployed();
 
         var totalSupply = await tokenInstance.INITIAL_SUPPLY();
-        console.log("totalSupply = "+totalSupply);
+        // console.log("totalSupply = "+totalSupply);
 
         var balanceAcct0 = await tokenInstance.balanceOf(acct0);
-        console.log("balanceAcct0 = "+balanceAcct0);
+        // console.log("balanceAcct0 = "+balanceAcct0);
         assert.equal(balanceAcct0.toNumber(), totalSupply.toNumber(), "Account0 does not have the correct tokens");
         
         var balanceAcct1 = await tokenInstance.balanceOf(acct1);
-        console.log("balanceAcct1 = "+balanceAcct1);
+        // console.log("balanceAcct1 = "+balanceAcct1);
         assert.equal(balanceAcct1.toNumber(), 0, "Account1 does not have the correct tokens");
 
         var roomBookingInstance = await BCCRoomBooking.deployed();
@@ -102,11 +104,11 @@ contract('BCCRoomBooking', function (accounts) {
         // console.log(data);
         
         var newBalanceAcct0 = await tokenInstance.balanceOf(acct0);
-        console.log("newBalanceAcct0 = "+newBalanceAcct0);
+        // console.log("newBalanceAcct0 = "+newBalanceAcct0);
         // assert.equal((balanceAcct0.toNumber()+_price), newBalanceAcct0, "Account0 does not have the correct tokens");
         
         var newBalanceAcct1 = await tokenInstance.balanceOf(acct1);
-        console.log("newBalanceAcct1 = "+newBalanceAcct1);
+        // console.log("newBalanceAcct1 = "+newBalanceAcct1);
         // assert.equal((balanceAcct1.toNumber()-_price), newBalanceAcct1, "Account1 does not have the correct tokens");
 
         return ;

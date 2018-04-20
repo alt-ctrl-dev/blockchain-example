@@ -4,7 +4,6 @@ App = {
   c_owner: "0x0",
   account: "0x0",
   loading: false,
-  roomInstance: null,
 
   init: function () {
     App.initWeb3();
@@ -17,38 +16,34 @@ App = {
       web3 = new Web3(web3.currentProvider);
     } else {
       // set the provider you want from Web3.providers
+      //App.web3Provider = new Web3.providers.HttpProvider('https://kovan.infura.io/Drc7BtLI8LQWne78LRV2');
       App.web3Provider = new Web3.providers.HttpProvider('http://127.0.0.1:7545');
       web3 = new Web3(App.web3Provider);
     }
-
+    // if(web3.currentProvider.isMetaMask !== undefined && web3.currentProvider.isMetaMask)
     App.initContract()
   },
 
   initContract: function () {
-    $.get("BCCRoomBooking.json")
-      .done(function (data) {
-        // console.log(data);
-        // Get the necessary contract artifact file and instantiate it with truffle-contract.
-        // App.contracts.BCCRoomBooking = TruffleContract(data);
-        var BCCRoomBooking = TruffleContract(data);
+    var firstPromise = $.get("BCCToken.json");
+    var secondPromise = $.get("BCCRoomBooking.json");
 
-        // Set the provider for our contract.
-        // App.contracts.BCCRoomBooking.setProvider(App.web3Provider);
-        BCCRoomBooking.setProvider(App.web3Provider);
+    $.when(firstPromise, secondPromise).done(function (bccTokenArtifact, bccRoomBookingArtifact) {
+      // Get the necessary contract artifact file and instantiate it with truffle-contract.
+      App.contracts.BCCToken = TruffleContract(bccTokenArtifact[0]);
 
-        App.bindJQEvents();
-        BCCRoomBooking.deployed()
-          .then((instance) => {
-            App.roomInstance = instance;
-            App.getOwner();
-          }).catch(err => {
-            console.error("Could not get instance");
-            console.error(err);
-          });
-      })
-      .fail(function () {
-        alert("error getting ABI");
-      })
+      // Set the provider for our contract.
+      App.contracts.BCCToken.setProvider(App.web3Provider);
+
+      // Get the necessary contract artifact file and instantiate it with truffle-contract.
+      App.contracts.BCCRoomBooking = TruffleContract(bccRoomBookingArtifact[0]);
+
+      // Set the provider for our contract.
+      App.contracts.BCCRoomBooking.setProvider(App.web3Provider);
+
+      App.getOwner();
+    });
+    return App.bindJQEvents();
   },
 
   bindJQEvents: function () {
@@ -57,66 +52,38 @@ App = {
   },
 
   getOwner: function () {
-    App.roomInstance.owner().then((owner) => {
+    App.contracts.BCCRoomBooking.deployed().then((instance) => {
+      return instance.owner();
+    }).then((owner) => {
       App.c_owner = owner;
       App.getCurrentAccount();
       App.listenEvents();
-    }).catch(err => {
+    }).catch(err=>{
       console.error("Could not get owner");
       console.error(err);
     });
-
-    // App.contracts.BCCRoomBooking.deployed().then((instance) => {
-    //   return instance.owner();
-    // }).then((owner) => {
-    //   App.c_owner = owner;
-    //   App.getCurrentAccount();
-    //   App.listenEvents();
-    // }).catch(err => {
-    //   console.error("Could not get owner");
-    //   console.error(err);
-    // });
   },
 
-  listenEvents: function () {
-    var offerRoomEvent = App.roomInstance.OfferRoomEvent({
-      fromBlock: 0,
-      toBlock: 'latest'
-    });
-    offerRoomEvent.watch(function (error, result) {
-      console.log(result.args);
-      App.updateUI();
-    });
-
-    var bookRoomEvent = App.roomInstance.BookRoomEvent({
-      fromBlock: 0,
-      toBlock: 'latest'
-    });
-    bookRoomEvent.watch(function (error, result) {
-      console.log(result.args);
-      App.updateUI();
-    });
-
-    // App.contracts.BCCRoomBooking.deployed().then((roomBooking) => {
-
-    //   var offerRoomEvent = roomBooking.OfferRoomEvent({
-    //     fromBlock: 0,
-    //     toBlock: 'latest'
-    //   });
-    //   offerRoomEvent.watch(function (error, result) {
-    //     console.log(result.args);
-    //     App.updateUI();
-    //   });
-
-    //   var bookRoomEvent = roomBooking.BookRoomEvent({
-    //     fromBlock: 0,
-    //     toBlock: 'latest'
-    //   });
-    //   bookRoomEvent.watch(function (error, result) {
-    //     console.log(result.args);
-    //     App.updateUI();
-    //   });
-    // })
+  listenEvents: function() {
+    App.contracts.BCCRoomBooking.deployed().then((roomBooking) => {
+      var offerRoomEvent = roomBooking.OfferRoomEvent({
+        fromBlock: 0,
+        toBlock: 'latest'
+      });
+      offerRoomEvent.watch(function (error, result) {
+        console.log(result.args);
+        App.updateUI();
+      });
+  
+      var bookRoomEvent = roomBooking.BookRoomEvent({
+        fromBlock: 0,
+        toBlock: 'latest'
+      });
+      bookRoomEvent.watch(function (error, result) {
+        console.log(result.args);
+        App.updateUI();
+      });
+    })
   },
 
   getCurrentAccount: function () {
@@ -125,10 +92,10 @@ App = {
         console.error(error);
         return;
       }
-
+      var coinbase = accounts[0];
       window.requestAnimationFrame(() => {
-        if (web3.eth.accounts[0] !== App.account) {
-          App.account = web3.eth.accounts[0];
+        if (coinbase !== App.account) {
+          App.account = coinbase;
           App.updateUI();
         }
         App.getCurrentAccount();
@@ -138,13 +105,13 @@ App = {
 
 
   updateUI: function () {
-    $('#reload').modal('hide');
     $('#account').text("Account: " + App.account).css({
       "color": ((App.account == App.c_owner) ? "red" : "black")
     });
     App.getTokenBalance(App.account);
-    // App.getNumberOfRooms();
-    // App.reloadRooms();
+    // // Use our contract to retieve the balance.
+    App.getNumberOfRooms();
+    App.reloadRooms();
     if (App.account == App.c_owner) {
       $('#offer-room').show();
       $('#buy_token').hide();
@@ -166,23 +133,15 @@ App = {
     });
   },
 
-  getTokenBalance: function (account) {
-    debugger;
-    App.roomInstance.getBalance(account).then(function (result) {
-      debugger;
+  getTokenBalance: function () {
+    App.contracts.BCCRoomBooking.deployed().then(function (instance) {
+      return instance.getBalance(App.account);
+    }).then(function (result) {
       $('#accountBalance').text(result.c[0] + " BCC token(s) available");
     }).catch(function (err) {
       console.log(err.message);
       $('#accountBalance').text("Could not get tokens");
     });
-    // App.contracts.BCCToken.deployed().then(function (instance) {
-    //   return instance.balanceOf(App.account);
-    // }).then(function (result) {
-    //   $('#accountBalance').text(result.c[0] + " BCC token(s) available");
-    // }).catch(function (err) {
-    //   console.log(err.message);
-    //   $('#accountBalance').text("Could not get tokens");
-    // });
   },
 
   offerRoom: function (event) {
@@ -222,7 +181,7 @@ App = {
       appInstance.getRoomsForBooking()
         .then(function (roomIds) {
           // Retrieve and clear the room placeholder
-          console.log(roomIds, roomIds.length);
+          // console.log(roomIds, roomIds.length);
           var roomRow = $('#roomsRow');
           roomRow.empty();
           roomIds.forEach(roomId => {
@@ -253,7 +212,6 @@ App = {
     roomTemplate.find('.room-description').text(description);
     roomTemplate.find('.btn-booking').attr('data-id', id);
     roomTemplate.find('.btn-booking').attr('data-value', price);
-    debugger;
     if (App.account === owner && bookingPerson == "0x0000000000000000000000000000000000000000") {
       var bookingPersonAddress = bookingPerson.substring(0, 5) + "..." + bookingPerson.slice(-5);
       roomTemplate.find('.room-booked-by').text(bookingPersonAddress);
@@ -290,20 +248,33 @@ App = {
       })
       .then(result => {
 
-      }).error(err => {
+      }).catch(err => {
         console.error(err);
         alert('error occured');
       });
   },
 
-  buyTokens: function (event) {}
+  buyTokens: function (event) {
+    // event.preventDefault();
+    App.contracts.BCCRoomBooking.deployed().then(function (appInstance) {
+      var val = $("#tokenprice").val();
+      return appInstance.purchaseTokens({value:web3.toWei(val,"ether"),from:App.account});
+    })
+    .then(result => {
+      App.updateUI();
+      $('#buyToken').modal('hide');
+    }).catch(err => {
+      console.error(err);
+      alert('error occured');
+      $('#buyToken').modal('hide');
+    });
+    
+  }
 };
 
 
 $(function () {
   $(window).load(function () {
     App.init();
-
-    $('#reload').modal('show');
   });
 });

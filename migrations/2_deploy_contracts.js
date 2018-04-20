@@ -12,7 +12,7 @@ module.exports = (deployer, network, acounts) => {
   //Acounts can be used to initialize contract with different account, by default is it account[0]
   deployer.then(async () => {
     await deployer.deploy(BCCToken);
-    console.log(BCCToken.address);
+    // console.log(BCCToken.address);
     await deployer.deploy(BCCRoomBooking, BCCToken.address);
   });
 };

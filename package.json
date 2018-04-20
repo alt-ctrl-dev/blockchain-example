@@ -7,8 +7,10 @@
     "test": "test"
   },
   "scripts": {
+    "compile:contract": "truffle compile",
+    "migrate:contract": "truffle migrate  --network ganache",
     "build:contract": "truffle migrate --compile-all --reset --network ganache",
-    "dev":"lite-server",
+    "dev": "lite-server",
     "start": "npm run build:contract && npm run dev",
     "test": "truffle test --network ganache"
   },
@@ -18,6 +20,7 @@
     "lite-server": "^2.3.0"
   },
   "dependencies": {
+    "truffle-hdwallet-provider": "0.0.3",
     "zeppelin-solidity": "^1.5.0"
   }
 }
